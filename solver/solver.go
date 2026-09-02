@@ -9,18 +9,7 @@ type Assignment struct {
 	NumAnts int
 }
 
-// DistributeAnts computes the optimal ant-to-path assignment that minimises
-// the total number of turns (makespan).
-//
-// Formula:
-//
-//	For a set of paths with lengths L[0] ≤ L[1] ≤ ... ≤ L[k-1], the minimum
-//	turns T is the smallest integer such that:
-//	    Σ max(0, T - L[i] + 1) >= N
-//	Each path i then gets  n[i] = T - L[i] + 1  ants (≥ 1).
-//
-// We try using 1 path, then 2, etc., and pick the combination that yields the
-// fewest turns. This handles cases where a longer additional path still helps.
+// DistributeAnts chooses the best path split to minimize the final turn count.
 func DistributeAnts(paths []flow.Path, numAnts int) []Assignment {
 	if len(paths) == 0 || numAnts <= 0 {
 		return nil
@@ -76,8 +65,7 @@ func DistributeAnts(paths []flow.Path, numAnts int) []Assignment {
 	return result
 }
 
-// turnsForK computes the minimum turns when using exactly the first k paths.
-// paths must be sorted by length ascending.
+// turnsForK computes the minimum turn count for the first k paths.
 func turnsForK(paths []flow.Path, numAnts int) int {
 	// L[i] = number of tunnels (steps) on path i = len(path)-1
 	// Start T at the shortest path length and increment until capacity ≥ numAnts.

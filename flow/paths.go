@@ -7,8 +7,7 @@ import (
 // Path is an ordered slice of room names from ##start to ##end (inclusive).
 type Path []string
 
-// FindPaths returns all room-disjoint paths from start to end, sorted by
-// ascending length. Returns graph.ErrInvalidData if no path exists.
+// FindPaths returns the valid paths from start to end, sorted by length.
 func FindPaths(g *graph.Graph) ([]Path, error) {
 	net := buildNetwork(g)
 

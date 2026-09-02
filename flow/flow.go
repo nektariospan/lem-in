@@ -22,7 +22,7 @@ type network struct {
 	outNode map[string]int
 }
 
-// buildNetwork constructs the node-split flow network from a Graph.
+// buildNetwork creates the flow graph with one in/out node per room.
 func buildNetwork(g *graph.Graph) *network {
 	// Assign indices: for each room, allocate 2 nodes (in, out).
 	// start and end get the same treatment but their split-edge has ∞ capacity.

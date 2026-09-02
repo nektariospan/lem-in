@@ -1,4 +1,3 @@
-// Package parser reads and validates the lem-in input format.
 package parser
 
 import (
@@ -11,15 +10,11 @@ import (
 	"lem-in/graph"
 )
 
-// ParseInput reads from r and returns:
-//   - the populated Graph
-//   - raw input lines (for printing later)
-//   - an error (graph.ErrInvalidData) on any malformed input
+// ParseInput validates and loads the map format used by lem-in.
 func ParseInput(r io.Reader) (*graph.Graph, []string, error) {
 	scanner := bufio.NewScanner(r)
 	var rawLines []string
 
-	// ---- helper: read next non-empty raw line ----
 	readLine := func() (string, bool) {
 		for scanner.Scan() {
 			line := scanner.Text()
@@ -29,12 +24,10 @@ func ParseInput(r io.Reader) (*graph.Graph, []string, error) {
 		return "", false
 	}
 
-	// 1. Ant count
 	antLine, ok := readLine()
 	if !ok {
 		return nil, nil, graph.ErrInvalidData
 	}
-	// Skip leading comment lines before ant count
 	for strings.HasPrefix(antLine, "#") {
 		antLine, ok = readLine()
 		if !ok {
@@ -49,21 +42,18 @@ func ParseInput(r io.Reader) (*graph.Graph, []string, error) {
 	g := graph.NewGraph()
 	g.NumAnts = numAnts
 
-	// 2. Parse rooms and links
 	nextIsStart := false
 	nextIsEnd := false
-	parsingLinks := false // once we see first link line, rooms are done
+	parsingLinks := false
 
 	for scanner.Scan() {
 		line := scanner.Text()
 		rawLines = append(rawLines, line)
 
-		// Empty lines — skip
 		if strings.TrimSpace(line) == "" {
 			continue
 		}
 
-		// Directives
 		if line == "##start" {
 			nextIsStart = true
 			nextIsEnd = false
@@ -75,14 +65,12 @@ func ParseInput(r io.Reader) (*graph.Graph, []string, error) {
 			continue
 		}
 
-		// Other comments
 		if strings.HasPrefix(line, "#") {
 			nextIsStart = false
 			nextIsEnd = false
 			continue
 		}
 
-		// Link line: contains '-' but no spaces (rooms have spaces)
 		if strings.Contains(line, "-") && !strings.Contains(line, " ") {
 			parsingLinks = true
 			nextIsStart = false
@@ -93,9 +81,7 @@ func ParseInput(r io.Reader) (*graph.Graph, []string, error) {
 			continue
 		}
 
-		// Room line
 		if parsingLinks {
-			// A room after links have started is invalid
 			return nil, rawLines, graph.ErrInvalidData
 		}
 
@@ -134,14 +120,13 @@ func ParseInput(r io.Reader) (*graph.Graph, []string, error) {
 	return g, rawLines, nil
 }
 
-// parseRoom parses a line of the form "name x y".
+// parseRoom turns a room line into a graph room with integer coordinates.
 func parseRoom(line string) (*graph.Room, error) {
 	fields := strings.Fields(line)
 	if len(fields) != 3 {
 		return nil, graph.ErrInvalidData
 	}
 	name := fields[0]
-	// Room names must not start with 'L' or '#'
 	if len(name) == 0 || name[0] == 'L' || name[0] == '#' {
 		return nil, graph.ErrInvalidData
 	}
@@ -156,7 +141,6 @@ func parseRoom(line string) (*graph.Room, error) {
 	return &graph.Room{Name: name, X: x, Y: y}, nil
 }
 
-// parseLink parses a line of the form "roomA-roomB".
 func parseLink(g *graph.Graph, line string) error {
 	parts := strings.Split(line, "-")
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {

@@ -13,6 +13,7 @@ import (
 	"lem-in/solver"
 )
 
+// Try the provided path first, then fall back to the tests directory.
 func resolveInputPath(arg string) (string, error) {
 	if _, err := os.Stat(arg); err == nil {
 		return arg, nil
@@ -30,6 +31,7 @@ func turnSummary(moves []string) string {
 	return fmt.Sprintf("Number of turns: %d", len(moves))
 }
 
+// Entry point: load input, parse, solve, and print the final moves.
 func main() {
 	var input *os.File
 	switch len(os.Args) {
