@@ -80,6 +80,7 @@ func Run(assignments []solver.Assignment, endRoom string) []string {
 	for {
 		// occupied tracks which rooms are claimed this turn (excluding end).
 		occupied := make(map[string]bool)
+		usedEdges := make(map[string]bool)
 
 		var moveParts []string
 
@@ -100,7 +101,15 @@ func Run(assignments []solver.Assignment, endRoom string) []string {
 				ant.done = true
 				continue
 			}
+			fromRoom := ant.path[ant.step]
 			nextRoom := ant.path[nextStep]
+			edgeKey := fromRoom + "->" + nextRoom
+
+			// A tunnel can only be used once in a round.
+			if usedEdges[edgeKey] {
+				continue
+			}
+			usedEdges[edgeKey] = true
 
 			// Can we move there?
 			if nextRoom != endRoom && occupied[nextRoom] {

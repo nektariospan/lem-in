@@ -101,3 +101,17 @@ func TestCommentLinesPreserved(t *testing.T) {
 		t.Fatal("comment line not preserved in raw output")
 	}
 }
+
+func TestOnlyStartAndEndAreSpecialDirectives(t *testing.T) {
+	input := "2\n#rooms\n##start\ns 0 0\n##end\ne 1 0\ns-e"
+	if err := parse(input); err != nil {
+		t.Fatalf("expected #rooms and other comments to be ignored, got: %v", err)
+	}
+}
+
+func TestUnknownDoubleHashDirectiveIsIgnoredAsComment(t *testing.T) {
+	input := "2\n##rooms\n##start\ns 0 0\n##end\ne 1 0\ns-e"
+	if err := parse(input); err != nil {
+		t.Fatalf("expected ##rooms to be ignored as a comment, got: %v", err)
+	}
+}

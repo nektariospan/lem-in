@@ -47,3 +47,26 @@ func TestNoRoomConflict(t *testing.T) {
 		}
 	}
 }
+
+func TestNoTunnelReusePerTurn(t *testing.T) {
+	assignments := []solver.Assignment{
+		{Path: flow.Path{"s", "a", "e"}, NumAnts: 2},
+		{Path: flow.Path{"s", "b", "e"}, NumAnts: 2},
+	}
+	turns := Run(assignments, "e")
+	for _, turn := range turns {
+		edgeCount := make(map[string]int)
+		for _, move := range strings.Fields(turn) {
+			parts := strings.SplitN(move, "-", 2)
+			if len(parts) != 2 {
+				continue
+			}
+			// This test only checks a simple repeated-edge case; the simulation's
+			// internal model uses room occupancy and per-turn edge uniqueness.
+			edgeCount[parts[0]+"->"+parts[1]]++
+			if edgeCount[parts[0]+"->"+parts[1]] > 1 {
+				t.Fatalf("tunnel reused in same turn %q: %s", turn, parts[0]+"->"+parts[1])
+			}
+		}
+	}
+}
